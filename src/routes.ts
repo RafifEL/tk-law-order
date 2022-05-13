@@ -38,8 +38,8 @@ OrderRouter.get(
 
 OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
   try {
-    const { userId, orderItems } = req.body;
-    const order = await Order.create({ userId, orderItems });
+    const { userId, orderItems, deliveryService } = req.body;
+    const order = await Order.create({ userId, orderItems, deliveryService });
     return res.status(201).json({ data: order });
   } catch (err) {
     console.log(err);

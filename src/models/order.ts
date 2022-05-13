@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 export interface IOrder {
   userId: string;
+  deliveryService: string;
   orderItems: {
     name: string;
     image?: string;
@@ -43,6 +44,10 @@ const orderSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
+  },
+  deliveryService: {
+    type: String,
+    required: false,
   },
   orderItems: {
     type: [orderItemSchema],
