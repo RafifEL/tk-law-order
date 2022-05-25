@@ -7,16 +7,20 @@ export interface OrderCreateReq extends Request {
   body: IOrder;
 }
 
-OrderRouter.get('/order', async (req: Request, res: Response) => {
-  const order = await Order.find({});
-  if (!order) {
-    return res.status(404).json({
-      error: 'order_not_found',
-      error_description: 'Order Tidak Ditemukan',
-    });
+OrderRouter.get(
+  '/orders/:username',
+  async (req: Request & { params: { username: string } }, res: Response) => {
+    const { username } = req.params;
+    const order = await Order.find({ username });
+    if (!order) {
+      return res.status(404).json({
+        error: 'order_not_found',
+        error_description: 'Order Tidak Ditemukan',
+      });
+    }
+    return res.json({ data: order });
   }
-  return res.json({ data: order });
-});
+);
 
 OrderRouter.get(
   '/order/:id',
@@ -35,8 +39,14 @@ OrderRouter.get(
 
 OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
   try {
-    const { userId, orderItems, deliveryService } = req.body;
-    const order = await Order.create({ userId, orderItems, deliveryService });
+    const { username, nama, alamat, orderItems, deliveryService } = req.body;
+    const order = await Order.create({
+      username,
+      nama,
+      alamat,
+      orderItems,
+      deliveryService,
+    });
     return res.status(201).json({ data: order });
   } catch (err) {
     console.log(err);

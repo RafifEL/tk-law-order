@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 export interface IOrder {
   username: string;
-  name: string;
+  nama: string;
   alamat: string;
   deliveryService: string;
   orderItems: {
