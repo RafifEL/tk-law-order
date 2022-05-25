@@ -2,7 +2,9 @@
 import mongoose from 'mongoose';
 
 export interface IOrder {
-  userId: string;
+  username: string;
+  name: string;
+  alamat: string;
   deliveryService: string;
   orderItems: {
     name: string;
