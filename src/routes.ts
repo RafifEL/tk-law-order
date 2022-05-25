@@ -7,19 +7,16 @@ export interface OrderCreateReq extends Request {
   body: IOrder;
 }
 
-OrderRouter.get(
-  '/order',
-  async (req: Request, res: Response) => {
-    const order = await Order.find({});
-    if (!order) {
-      return res.status(404).json({
-        error: 'order_not_found',
-        error_description: 'Order Tidak Ditemukan',
-      });
-    }
-    return res.json({ data: order });
+OrderRouter.get('/order', async (req: Request, res: Response) => {
+  const order = await Order.find({});
+  if (!order) {
+    return res.status(404).json({
+      error: 'order_not_found',
+      error_description: 'Order Tidak Ditemukan',
+    });
   }
-);
+  return res.json({ data: order });
+});
 
 OrderRouter.get(
   '/order/:id',

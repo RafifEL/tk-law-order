@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import mongoose from 'mongoose';
 
-
 export interface IOrder {
   userId: string;
   deliveryService: string;
@@ -36,12 +35,22 @@ const orderItemSchema = new mongoose.Schema({
 
 orderItemSchema.set('toJSON', {
   virtuals: true,
-  versionKey:false,
-  transform: function (doc, ret) {   delete ret._id  }
+  versionKey: false,
+  transform: function (doc, ret) {
+    delete ret._id;
+  },
 });
 
 const orderSchema = new mongoose.Schema({
-  userId: {
+  username: {
+    type: String,
+    required: true,
+  },
+  nama: {
+    type: String,
+    required: true,
+  },
+  alamat: {
     type: String,
     required: true,
   },
@@ -57,9 +66,10 @@ const orderSchema = new mongoose.Schema({
 
 orderSchema.set('toJSON', {
   virtuals: true,
-  versionKey:false,
-  transform: function (doc, ret) {   delete ret._id  }
+  versionKey: false,
+  transform: function (doc, ret) {
+    delete ret._id;
+  },
 });
-
 
 export const Order = mongoose.model<OrderDoc>('Order', orderSchema);
