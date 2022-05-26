@@ -1,6 +1,7 @@
 import express, { json } from 'express';
 import mongoose from 'mongoose';
 import OrderRouter from './routes';
+import cors from 'cors';
 
 async function main() {
   await mongoose.connect('mongodb://localhost:27017', {
@@ -14,6 +15,12 @@ async function main() {
   app.use(
     express.urlencoded({
       extended: true,
+    })
+  );
+
+  app.use(
+    cors({
+      origin: '*',
     })
   );
 
