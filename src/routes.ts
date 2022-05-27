@@ -70,6 +70,7 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
           ),
           deskripsi: 'pembayaran',
         }),
+        headers: { 'Content-Type': 'multipart/form-data' },
       }
     );
     console.log(responseEwallet.status);
