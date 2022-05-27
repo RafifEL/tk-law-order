@@ -58,6 +58,23 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       deliveryService,
     });
 
+    const responseEwallet = await fetch(
+      'https://e-market-wallet.herokuapp.com/api/e-wallet/bayar',
+      {
+        method: 'post',
+        body: JSON.stringify({
+          username,
+          nominal: orderItems.reduce(
+            (prev, cur) => prev + Number(cur.price) * cur.quantity,
+            0
+          ),
+          deskripsi: 'pembayaran',
+        }),
+      }
+    );
+    console.log(responseEwallet.status);
+    if (responseEwallet.status !== 200) throw new Error('Tidak cukup saldo');
+
     const response = await fetch(
       'http://tk.ordersummary.getoboru.xyz/orderSummary',
       {
