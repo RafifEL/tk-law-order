@@ -37,7 +37,7 @@ OrderRouter.get(
     }
 
     const response = await fetch(
-      `http://tk.ordersummary.getoboru.xyz/order/${id}`,
+      `http://tk.ordersummary.getoboru.xyz/orderSummary/${id}`,
       {
         method: 'get',
         headers: { 'Content-Type': 'application/json' },
