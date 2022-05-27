@@ -96,6 +96,7 @@ OrderRouter.get(
       );
 
       const dataSummary = await response.json();
+      console.log(dataSummary);
       return res.json({
         data: {
           ...order.toJSON(),
