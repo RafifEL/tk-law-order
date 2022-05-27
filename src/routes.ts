@@ -79,27 +79,35 @@ OrderRouter.get(
   async (req: Request & { params: { id: string } }, res: Response) => {
     const { id } = req.params;
     const order = await Order.findById(id);
-    if (!order) {
-      return res.status(404).json({
-        error: 'order_not_found',
-        error_description: 'Order Tidak Ditemukan',
+    try {
+      if (!order) {
+        return res.status(404).json({
+          error: 'order_not_found',
+          error_description: 'Order Tidak Ditemukan',
+        });
+      }
+
+      const response = await fetch(
+        `http://tk.ordersummary.getoboru.xyz/orderSummary/${id}`,
+        {
+          method: 'get',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (response.status !== 200) throw new Error('Tidak cukup saldo');
+
+      const dataSummary = await response.json();
+      return res.json({
+        data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(400).json({
+        error: 'invalid_request',
+        error_description: 'ada kesalahan',
       });
     }
-
-    const response = await fetch(
-      `http://tk.ordersummary.getoboru.xyz/orderSummary/${id}`,
-      {
-        method: 'get',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-
-    if (response.status !== 200) throw new Error('Tidak cukup saldo');
-
-    const dataSummary = await response.json();
-    return res.json({
-      data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
-    });
   }
 );
 
