@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { IOrder, Order } from './models/order';
+import fetch from 'node-fetch';
 
 const OrderRouter = express.Router();
 
@@ -33,7 +34,16 @@ OrderRouter.get(
         error_description: 'Order Tidak Ditemukan',
       });
     }
-    return res.json({ data: order });
+
+    const response = await fetch(`http://tk.ordersummary.getoboru.xyz/${id}`, {
+      method: 'get',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const dataSummary = await response.json();
+    return res.json({
+      data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
+    });
   }
 );
 
@@ -47,7 +57,26 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       orderItems,
       deliveryService,
     });
-    return res.status(201).json({ data: order });
+
+    const response = await fetch(
+      'http://tk.ordersummary.getoboru.xyz/orderSummary',
+      {
+        method: 'post',
+        body: JSON.stringify({
+          orderId: order.id,
+          customerName: order.nama,
+          customerAddress: order.alamat,
+          deliveryService: 'AnterSekalian',
+          orderItems,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    const dataSummary = await response.json();
+    return res.status(201).json({
+      data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
+    });
   } catch (err) {
     console.log(err);
     return res.status(400).json({
