@@ -3,6 +3,28 @@ import { IOrder, Order } from './models/order';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 
+const infoLog = (message: string) => {
+  return fetch('http://tk.logger.getoboru.xyz/info', {
+    method: 'post',
+    body: JSON.stringify({
+      message,
+      app: 'order',
+    }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
+const errorLog = (message: string) => {
+  return fetch('http://tk.logger.getoboru.xyz/error', {
+    method: 'post',
+    body: JSON.stringify({
+      message,
+      app: 'order',
+    }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
   try {
@@ -63,6 +85,7 @@ OrderRouter.get(
   '/orders',
   async (req: Request & { params: { username: string } }, res: Response) => {
     const { user } = (req as any).auth;
+    infoLog(`Get ${user.username} orders`);
     const order = await Order.find({ username: user.username || '' });
     if (!order) {
       return res.status(404).json({
@@ -78,9 +101,20 @@ OrderRouter.get(
   '/order/:id',
   async (req: Request & { params: { id: string } }, res: Response) => {
     const { id } = req.params;
+    infoLog(`Get Order ${id}`);
+    fetch('http://tk.logger.getoboru.xyz/warn', {
+      method: 'post',
+      body: JSON.stringify({
+        message: 'Get Order ' + id,
+        app: 'order',
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+
     const order = await Order.findById(id);
     try {
       if (!order) {
+        infoLog(`Order ${id} npt found`);
         return res.status(404).json({
           error: 'order_not_found',
           error_description: 'Order Tidak Ditemukan',
@@ -97,6 +131,7 @@ OrderRouter.get(
 
       const dataSummary = await response.json();
       console.log(dataSummary);
+
       return res.json({
         data: {
           ...order.toJSON(),
@@ -107,6 +142,7 @@ OrderRouter.get(
       });
     } catch (err) {
       console.log(err);
+      errorLog(`Error Get Order ${id}`);
       return res.status(400).json({
         error: 'invalid_request',
         error_description: 'ada kesalahan',
@@ -117,6 +153,7 @@ OrderRouter.get(
 
 OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
   try {
+    infoLog('Create Order');
     const { token, user } = (req as any).auth;
     const { username, nama, alamat, orderItems, deliveryService } = req.body;
     const order = await Order.create({
@@ -179,6 +216,7 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
     });
   } catch (err) {
+    errorLog('failed create order');
     console.log(err);
     return res.status(400).json({
       error: 'invalid_request',
