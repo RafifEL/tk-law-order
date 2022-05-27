@@ -95,11 +95,6 @@ OrderRouter.get(
         }
       );
 
-      console.log(response.status);
-      console.log(response.statusText);
-      console.log(response);
-      if (response.status !== 200) throw new Error('Tidak cukup saldo');
-
       const dataSummary = await response.json();
       return res.json({
         data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
