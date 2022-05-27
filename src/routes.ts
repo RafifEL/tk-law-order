@@ -81,7 +81,6 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       {
         method: 'post',
         body: formData,
-        headers: { 'Content-Type': 'multipart/form-data' },
       }
     );
     console.log(responseEwallet.status);
