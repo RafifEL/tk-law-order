@@ -97,7 +97,12 @@ OrderRouter.get(
 
       const dataSummary = await response.json();
       return res.json({
-        data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
+        data: {
+          ...order.toJSON(),
+          summary: dataSummary?.data?.downloadLink
+            ? `http://tk.ordersummary.getoboru.xyz/${dataSummary?.data?.downloadLink}`
+            : undefined,
+        },
       });
     } catch (err) {
       console.log(err);
