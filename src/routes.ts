@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { IOrder, Order } from './models/order';
 import fetch from 'node-fetch';
+import FormData from 'form-data';
 
 const OrderRouter = express.Router();
 
@@ -58,6 +59,7 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       deliveryService,
     });
 
+    const formData = new FormData();
     console.log({
       username,
       nominal: orderItems.reduce(
@@ -65,18 +67,20 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
         0
       ),
     });
+    formData.append('username', username);
+    formData.append(
+      'nominal',
+      orderItems.reduce(
+        (prev, cur) => prev + Number(cur.price) * cur.quantity,
+        0
+      )
+    );
 
     const responseEwallet = await fetch(
       'https://e-market-wallet.herokuapp.com/api/e-wallet/bayar',
       {
         method: 'post',
-        body: JSON.stringify({
-          username,
-          nominal: orderItems.reduce(
-            (prev, cur) => prev + Number(cur.price) * cur.quantity,
-            0
-          ),
-        }),
+        body: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       }
     );
