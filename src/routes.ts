@@ -58,6 +58,14 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       deliveryService,
     });
 
+    console.log({
+      username,
+      nominal: orderItems.reduce(
+        (prev, cur) => prev + Number(cur.price) * cur.quantity,
+        0
+      ),
+    });
+
     const responseEwallet = await fetch(
       'https://e-market-wallet.herokuapp.com/api/e-wallet/bayar',
       {
@@ -68,7 +76,6 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
             (prev, cur) => prev + Number(cur.price) * cur.quantity,
             0
           ),
-          deskripsi: 'pembayaran',
         }),
         headers: { 'Content-Type': 'multipart/form-data' },
       }
