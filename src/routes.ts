@@ -36,10 +36,13 @@ OrderRouter.get(
       });
     }
 
-    const response = await fetch(`http://tk.ordersummary.getoboru.xyz/${id}`, {
-      method: 'get',
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const response = await fetch(
+      `http://tk.ordersummary.getoboru.xyz/order/${id}`,
+      {
+        method: 'get',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
 
     const dataSummary = await response.json();
     return res.json({
