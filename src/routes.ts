@@ -1,9 +1,59 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { IOrder, Order } from './models/order';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 
+const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+  const { authorization } = req.headers;
+  try {
+    if (!authorization) {
+      return res.status(403).json({
+        error: 'no_token',
+        description: 'Access Token Required',
+      });
+    }
+
+    const [method, token] = authorization.split(' ');
+
+    if (method !== 'Bearer') {
+      return res.status(403).json({
+        error: 'wrong_method',
+        description: 'Not Bearer Auth Method',
+      });
+    }
+
+    if (!token) {
+      return res.status(403).json({
+        error: 'no_token',
+        description: 'Access Token Required',
+      });
+    }
+
+    const response = await fetch(
+      'http://tk.oauth.getoboru.xyz/token/resource',
+      {
+        method: 'get',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (response.status !== 200) throw new Error('Invalid Token');
+    const data = await response.json();
+
+    (req as any).auth = { user: data?.data, token };
+  } catch (err) {
+    return res.status(403).json({
+      error: 'invalid_token',
+      description: 'Invalid Token',
+    });
+  }
+  return next();
+};
+
 const OrderRouter = express.Router();
+OrderRouter.use(verifyToken);
 
 export interface OrderCreateReq extends Request {
   body: IOrder;
@@ -44,6 +94,8 @@ OrderRouter.get(
       }
     );
 
+    if (response.status !== 200) throw new Error('Tidak cukup saldo');
+
     const dataSummary = await response.json();
     return res.json({
       data: { ...order.toJSON(), summary: dataSummary?.data?.downloadLink },
@@ -53,11 +105,12 @@ OrderRouter.get(
 
 OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
   try {
+    const { token, user } = (req as any).auth;
     const { username, nama, alamat, orderItems, deliveryService } = req.body;
     const order = await Order.create({
-      username,
-      nama,
-      alamat,
+      username: user?.username || '',
+      nama: user.nama || '',
+      alamat: user.alamat || '',
       orderItems,
       deliveryService,
     });
@@ -70,7 +123,7 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
         0
       ),
     });
-    formData.append('username', username);
+    formData.append('username', user?.username || '');
     formData.append(
       'nominal',
       orderItems.reduce(
@@ -84,6 +137,9 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
       {
         method: 'post',
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
     console.log(responseEwallet.status);
