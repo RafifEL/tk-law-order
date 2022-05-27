@@ -60,10 +60,10 @@ export interface OrderCreateReq extends Request {
 }
 
 OrderRouter.get(
-  '/orders/:username',
+  '/orders',
   async (req: Request & { params: { username: string } }, res: Response) => {
-    const { username } = req.params;
-    const order = await Order.find({ username });
+    const { user } = (req as any).auth;
+    const order = await Order.find({ username: user.username || '' });
     if (!order) {
       return res.status(404).json({
         error: 'order_not_found',
