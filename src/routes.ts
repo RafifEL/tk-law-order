@@ -85,6 +85,7 @@ OrderRouter.post('/order', async (req: OrderCreateReq, res: Response) => {
     );
     console.log(responseEwallet.status);
     console.log(responseEwallet.statusText);
+    console.log(responseEwallet);
     if (responseEwallet.status !== 200) throw new Error('Tidak cukup saldo');
 
     const response = await fetch(
